@@ -59,7 +59,6 @@ function isPlayerEnded(player) {
 
 function update(timeDiff) {
 	const player = this;
-	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
 	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
 		if (!player.hasAudio) {
 			player.driver.currentTime = player.video.currentTime + (timeDiff * player.video.playbackRate) / 1000;
@@ -190,7 +189,9 @@ function addPlayer(video, hasAudio) {
 				player.driver.paused = false;
 				// media automatically goes to 0 if .play() is called when it's done
 				if (isPlayerEnded(player)) {
-					setTime(video, 0);
+					console.log('=================== setTime 0');
+					player.updater.stop();
+					// setTime(video, 0);
 				}
 			},
 			get ended() {
@@ -250,6 +251,7 @@ function addPlayer(video, hasAudio) {
 
 function overloadAPI(video) {
 	const player = video[ಠ];
+	video.inLineVideo = true;
 	video[ಠplay] = video.play;
 	video[ಠpause] = video.pause;
 	video.play = play;
@@ -269,9 +271,11 @@ function enableInlineVideo(video, hasAudio = true, onlyWhitelisted = true) {
 	if ((onlyWhitelisted && !isWhitelisted) || video[ಠ]) {
 		return;
 	}
-	addPlayer(video, hasAudio);
-	overloadAPI(video);
-	video.classList.add('IIV');
+	if (!video.inLineVideo) {
+		addPlayer(video, hasAudio);
+		overloadAPI(video);
+		video.classList.add('IIV');
+	}
 	if (!hasAudio && video.autoplay) {
 		video.play();
 	}
